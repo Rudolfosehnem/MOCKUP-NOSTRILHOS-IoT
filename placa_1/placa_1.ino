@@ -9,13 +9,13 @@ const int BrokerPort = 1883;
 const String BrokerUser = "";
 const String BrokerPass = "";
 
-const String SSID = "FIESC_IoT_EDU";
+const String SSID = "FIESC_IOT_EDU";
 const String PASS = "8120gv08";
 
 void setup() {
   Serial.begin(115200);
   Serial.println("Conectando ao WiFi"); //apresenta essa msg na tela
-  WiFi.begin("SSID,PASS");  //tenta conectar na rede 
+  WiFi.begin(SSID,PASS);  //tenta conectar na rede 
   while(WiFi.status() != WL_CONNECTED){
     Serial.print("."); //Mostra "......."
     delay(200);
@@ -37,5 +37,11 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
+  String mensagem = "Rudolfo:";
+  mensagem += "oi";
+  mqtt.publish("Topico-DSM14" , mensagem.c_str());
+
+  mqtt.loop();
+  delay(1000);
 
 }
