@@ -31,7 +31,8 @@ void setup() {
     Serial.print(".");
     delay(200);
   }
-
+  mqtt.subscribe("Iluminacao"); //recebe a mensagem
+  mqtt.setCallback(callback)
   Serial.println("\nConectado ao Broker!");
 }
 
@@ -39,9 +40,28 @@ void loop() {
   // put your main code here, to run repeatedly:
   String mensagem = "Rudolfo:";
   mensagem += "oi";
-  mqtt.publish("Topico-DSM14" , mensagem.c_str());
+  mqtt.publish("Iluminacao" , "Acender"); //envia mensagens 
 
   mqtt.loop();
   delay(1000);
 
 }
+
+void callback(char* topic, byte* payload, unsigned int length){     //processa a mensagem recebida
+  String msg = "";
+  for(int i = 0;< length; i++){
+    msg += (char) payload[i];
+  }
+  if(topic == "Iluminacao"&& msg == "Acender"){
+    digitalWrite(2,HIGH);
+  }else if(topic == "Iluminacao"&& msg == "Apagar"){
+    digitalWrite(2,LOW);
+ }
+}
+
+
+
+
+
+
+
