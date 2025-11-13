@@ -3,13 +3,19 @@
 #include <PubSubClient.h>
 #include "env.h"
 
+
 WiFiClientSecure client;
 PubSubClient mqtt(client);
 
-
+const byte LDR_PIN = 34;
+const byte LED_PIN = 19;
 
 void setup() {
   Serial.begin(115200);
+
+  pinMode(LDR_PIN,INPUT);
+  pinMode(LED_PIN,OUTPUT);
+
   client.setInsecure();
   Serial.println("Conectando ao WiFi"); //apresenta essa msg na tela
   WiFi.begin(WIFI_SSID,WIFI_PASS);  //tenta conectar na rede 
@@ -28,16 +34,18 @@ void setup() {
     Serial.print(".");
     delay(200);
   }
-  mqtt.subscribe("TOPIC_ILUM"); //recebe a mensagem
   mqtt.setCallback(callback);
+  mqtt.subscribe(TOPIC_ILUM); //recebe a mensagem
   Serial.println("\nConectado ao Broker!");
+  
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  mqtt.publish(TOPIC_ILUM , "Acender"); //envia mensagens 
-  mqtt.publish(TOPIC_UMID , "Umido");
+  mqtt.publish(TOPIC_ILUM , lerLDR(LDR_PIN)); //envia mensagens 
   mqtt.publish(TOPIC_PRESEN , "Presente");
+
+  mqtt.publish(TOPIC_UMID , "Umido");
   mqtt.publish(TOPIC_TEMP , "Temperatura");
 
 
@@ -51,9 +59,22 @@ void callback(char* topic, byte* payload, unsigned int length){     //processa a
   for(int i = 0; i < length; i++){
     msg += (char) payload[i];
   }
-  if(topic == "TOPIC_ILUM"&& msg == "Acender"){
-    digitalWrite(2,HIGH);
-  }else if(topic == "TOPIC_ILUM"&& msg == "Apagar"){
-    digitalWrite(2,LOW);
+  Serial.print("Recebido: ");
+  Serial.println(msg);
+  if(strcmp(topic, TOPIC_ILUM) == 0 && msg.equals("Ambiente escuro")){
+    digitalWrite(LED_PIN,HIGH);
+  }else if(strcmp(topic, TOPIC_ILUM) == 0 && msg.equals("Ambiente claro")){
+    digitalWrite(LED_PIN,LOW);
  }
+}
+
+char* lerLDR(byte pino){
+  int leituraLDR = analogRead(pino);
+  float tensao = (leituraLDR * 3.3) / 4095.0;
+  
+  if (leituraLDR > 2000) {
+    return "Ambiente escuro";
+  } else {
+    return "Ambiente claro";
+  }
 }
