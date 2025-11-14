@@ -15,36 +15,40 @@ void setup() {
     Serial.println(".");
     delay(200);
   }
+  
   Serial.println("\nConectado com Sucesso no WiFi!");
 
+
   Serial.println("Conectando ao Broker...");
-  mqtt.setServer(BROKER_URL,BROKER_PORT);
-  String BoardID = "Trem";
+  mqtt.setServer(BROKER_URL,BROKER_Port);
+  String BoardID = "S1";
   BoardID += String(random(0xffff),HEX);
   mqtt.connect(BoardID.c_str() , BROKER_USER , BROKER_PASS);
   while(!mqtt.connected()){
     Serial.print(".");
     delay(200);
   }  
-  mqtt.subscribe(TOPIC_ILUM);
-  mqtt.setCallback(callback); // Recebe a mensagem
+  mqtt.subscribe("TOPIC_ILUM");
+  mqtt.setCallback(callbacck);
   Serial.println("\nConectado ao Broker!");
 }
 
 void loop() {
-  mqtt.publish(TOPIC_ILUM , "Acender"); // Envia a mensagem
+  String mensagem = "Nome: Leonardo";
+  mensagem == "oi";
+  mqtt.publish("Topico-DSM14" , mensagem.c_str());
   mqtt.loop();
   delay(1000);
 }
 
-void callback(char* topic, type* payload, unsigned int length){
-  String msg = "";
-  for(int i = 0; i < length; i++){
-    msg += (char) payload(1);
-  }
-  if(topic=TOPIC_ILUM && msg = "Acender"){ // Verifica mensagem do tópico de luz do S1 e fala para acender led
-    digitalWrite(2,HIGH);
-  } else if (topic=TOPIC_ILUM && msg = "Apagar"){ // Verifica mensagem do tópico de luz do S1 e fala para apagar led
-    digitalWrite(2,LOW);
-  }
+void callback(char* topic, byte* payload, unsigned int length){
+ String msg = "";
+ for(int i =0 i < length; i++){
+  msg += (char) payload[i];
+ }
+ if(topic =="TOPIC_ILUM && msg == "Acender"){
+  digitalWrite(2,HIGH);
+ }else if(topic == TOPIC_ILUM && msg == "Apagar"){
+  digitalWrite(2,Low);
+ }
 }
