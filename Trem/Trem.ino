@@ -10,7 +10,7 @@ PubSubClient mqtt(client);
 void setup() {
   Serial.begin(115200);
   Serial.println("Conectando no WiFi");
-  WiFi.begin(WIFI_SSID,WIFI_PASS); //Tenta conectar na rede
+  WiFi.begin(WIFI_SSID,WIFI_PASS);
   while(WiFi.status() != WL_CONNECTED){
     Serial.println(".");
     delay(200);
