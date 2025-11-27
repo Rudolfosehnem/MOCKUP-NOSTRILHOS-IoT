@@ -1,4 +1,4 @@
-#include <WiFi.h>
+#include <WiFi.h>//bibliotecas e wifi
 #include <WiFiClientSecure.h>
 #include <PubSubClient.h>
 #include "env.h"
@@ -6,7 +6,7 @@
 WiFiClientSecure client;
 PubSubClient mqtt(client);
 
-const byte TRIGGER_PIN = 19;
+const byte TRIGGER_PIN = 19;//pinos conectados aos sensores ultra sonicos
 const byte ECHO_PIN = 13;
 
 const byte TRIGGER_PIN2 = 27;
@@ -19,31 +19,31 @@ bool objetoProximoAnterior = false;
 
 void conectaWiFi() {
   Serial.println("Conectando ao WiFi...");
-  WiFi.begin(WIFI_SSID, WIFI_PASS);
+  WiFi.begin(WIFI_SSID, WIFI_PASS);//conecão com wifi
 
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
-    delay(500);
+    delay(500);//( ... ) infinito até conectar
   }
 
-  Serial.println("\nWiFi conectado!");
+  Serial.println("\nWiFi conectado!"); //wifi conectado
   Serial.print("IP: ");
   Serial.println(WiFi.localIP());
 }
 
 void conectaMQTT() {
   while (!mqtt.connected()) {
-    Serial.print("Conectando ao broker MQTT...");
+    Serial.print("Conectando ao broker MQTT..."); //conecção com o broker
     String clientId = "ESP32Client-";
     clientId += String(random(0xffff), HEX);
 
     if (mqtt.connect(clientId.c_str(), BROKER_USER, BROKER_PASS)) {
-      Serial.println("Conectado!");
+      Serial.println("Conectado!"); //conectado ao broker
       mqtt.subscribe(TOPIC_ILUM);
     } else {
-      Serial.print("Falha (rc=");
+      Serial.print("Falha (rc="); //falha ao conectar ao broker
       Serial.print(mqtt.state());
-      Serial.println("), tentando novamente em 5s");
+      Serial.println("), tentando novamente em 5s"); //tentativa de reconeção
       delay(5000);
     }
   }
@@ -54,8 +54,7 @@ long lerDistancia(byte triggerPin, byte echoPin) {
   delayMicroseconds(2);
   digitalWrite(triggerPin, HIGH);
   delayMicroseconds(10);
-  digitalWrite(triggerPin, LOW);
-
+  digitalWrite(triggerPin, LOW);//envia o pulso ultrassônico para medir distância
   long duracao = pulseIn(echoPin, HIGH, 20000); 
   if (duracao == 0) return -1; 
 
@@ -68,7 +67,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     msg += (char)payload[i];
   }
 
-  Serial.print("Mensagem recebida em ");
+  Serial.print("Mensagem recebida em ");//"mensagem recebida pelo MQTT"
   Serial.print(topic);
   Serial.print(": ");
   Serial.println(msg);
@@ -105,8 +104,7 @@ void loop() {
   if (!mqtt.connected()) {
     conectaMQTT();
   }
-  mqtt.loop();
-
+  mqtt.loop(); "mantém a conexão MQTT funcionando"
   unsigned long agora = millis();
   if (agora - lastMsg > 2000) {
     lastMsg = agora;
@@ -124,12 +122,12 @@ void loop() {
 
     if (distancia1 > 0 && distancia1 < 10) {
       if (!objetoProximoAnterior) {
-        mqtt.publish(TOPIC_ILUM, "Objeto proximo no sensor 1");
+        mqtt.publish(TOPIC_ILUM, "Objeto proximo no sensor 1"); //led 1 liga se passar pelo sensor 1
         objetoProximoAnterior = true;
       }
-    } else if (distancia2 > 0 && distancia2 < 10) {
+    } else if (distancia2 > 0 && distancia2 < 10) { 
       if (!objetoProximoAnterior) {
-        mqtt.publish(TOPIC_ILUM, "Objeto proximo no sensor 2");
+        mqtt.publish(TOPIC_ILUM, "Objeto proximo no sensor 2");//led 2 liga se passar pelo sensor 2
         objetoProximoAnterior = true;
       }
     } else {
